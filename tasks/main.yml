@@ -1,0 +1,40 @@
+---
+# tasks file for ansible-tfenv
+# Pre-reqs
+- name: Install git
+  package: 
+    name: "git"
+
+- name: Create tfenv directory
+  file: path=/opt/tfenv state=directory mode="a+rw"
+
+- name: Get tfenv
+  ansible.builtin.git:
+    repo: 'https://github.com/tfutils/tfenv.git'
+    dest: /opt/tfenv
+
+- name: Verify tfenv exists
+  stat: path=/opt/tfenv/bin/tfenv
+  register: tfenv_stat
+
+- name: Configure tfenv on system bin.
+  file:
+    src: "/opt/tfenv/bin/tfenv"
+    dest: "/usr/bin/tfenv"
+    state: link
+  when: tfenv_stat.stat.exists
+
+- name: Configure tfenv on system sbin.
+  file:
+    src: "/opt/tfenv/bin/tfenv"
+    dest: "/usr/sbin/tfenv"
+    state: link
+  when: tfenv_stat.stat.exists
+
+- command: tfenv -v
+  register: result_tfenv
+  failed_when: false
+  changed_when: false
+
+- debug:
+    var: result_tfenv.stdout
