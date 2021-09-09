@@ -60,6 +60,14 @@
   with_items: "{{ users.stdout_lines }}"
   when: tfenv_stat.stat.exists
 
+- name: Configure terraform on user bin.
+  file:
+    src: "/opt/tfenv/bin/terraform"
+    dest: "/home/{{ item }}/.local/bin/terraform"
+    state: link
+  with_items: "{{ users.stdout_lines }}"
+  when: tfenv_stat.stat.exists
+
 - name: Create user bin directory
   file: path=/home/{{ item }}/.local/bin/ state=directory mode="a+rw"
   when: tfenv_stat.stat.exists
