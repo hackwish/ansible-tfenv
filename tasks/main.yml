@@ -80,7 +80,9 @@
     line: 'export PATH="/opt/tfenv/bin/:$PATH"'
 
 # Check status
-- shell: bash -ilc 'which tfenv'
+- shell: which tfenv
+  args:
+    executable: /bin/bash -ilc
   register: which_tfenv
   failed_when: false
   changed_when: false
