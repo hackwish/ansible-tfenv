@@ -5,8 +5,14 @@
   package: 
     name: "git"
 
+- name: check if tfenv exists
+  stat: 
+    path: /opt/tfenv/bin/tfenv
+  register: tfenv_exists
+  
 - name: Create tfenv directory
   file: path=/opt/tfenv state=directory mode="a+rw"
+  when: tfenv_exists.stat.exists == False
 
 - name: Get tfenv
   ansible.builtin.git:
