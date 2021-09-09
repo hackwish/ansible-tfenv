@@ -71,6 +71,7 @@
     state: present
     line: 'export PATH="/opt/tfenv/bin/:$PATH"'
   with_items: "{{ users.stdout_lines }}"
+  ignore_errors: true
 
 - name: update tfenv on skel bashrc
   lineinfile:
