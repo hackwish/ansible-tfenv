@@ -60,12 +60,23 @@
   with_items: "{{ users.stdout_lines }}"
   when: tfenv_stat.stat.exists
 
-- name: update tfenv on bash_profile
+- name: Create user bin directory
+  file: path=/home/{{ item }}/.local/bin/ state=directory mode="a+rw"
+  when: tfenv_stat.stat.exists
+  with_items: "{{ users.stdout_lines }}"
+
+- name: update tfenv on users bashrc
   lineinfile:
-    dest: /home/{{ item }}/.bash_profile
+    dest: /home/{{ item }}/.bashrc
     state: present
     line: 'export PATH="/opt/tfenv/bin/:$PATH"'
   with_items: "{{ users.stdout_lines }}"
+
+- name: update tfenv on skel bashrc
+  lineinfile:
+    dest: /etc/skel/.bashrc
+    state: present
+    line: 'export PATH="/opt/tfenv/bin/:$PATH"'
 
 # Check status
 - shell: bash -ilc 'which tfenv'
