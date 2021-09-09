@@ -31,6 +31,46 @@
     state: link
   when: tfenv_stat.stat.exists
 
+# Customize Per existing user
+- name : list users to apply tfenv
+  shell: |
+    getent passwd | awk -F: '$3 > 999 {print $1}'
+  register: users
+
+- debug:
+    var: users
+    verbosity: 2
+
+- name: Create user bin directory
+  file: path=/home/{{ item }}/.local/bin/ state=directory mode="a+rw"
+  when: tfenv_stat.stat.exists
+  with_items: "{{ users.stdout_lines }}"
+
+- name: Configure tfenv on user bin.
+  file:
+    src: "/opt/tfenv/bin/tfenv"
+    dest: "/home/{{ item }}/.local/bin/tfenv"
+    state: link
+  with_items: "{{ users.stdout_lines }}"
+  when: tfenv_stat.stat.exists
+
+- name: update tfenv on bash_profile
+  lineinfile:
+    dest: /home/{{ item }}/.bash_profile
+    state: present
+    line: 'export PATH="/opt/tfenv/bin/:$PATH"'
+  with_items: "{{ users.stdout_lines }}"
+
+# Check status
+- shell: bash -ilc 'which tfenv'
+  register: which_tfenv
+  failed_when: false
+  changed_when: false
+
+- debug:
+    var:  which_tfenv.stdout
+    verbosity: 2
+
 - command: tfenv -v
   register: result_tfenv
   failed_when: false
